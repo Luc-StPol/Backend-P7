@@ -16,7 +16,7 @@ const storage = SharpMulter({
   imageOPtions: {
     fileFormat: 'png',
     quality: 80,
-    resize: { width: 500, height: 500 },
+    resize: { width: 500 },
   },
 });
 
