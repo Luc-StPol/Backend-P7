@@ -25,6 +25,7 @@ exports.getBestBooks = (req, res, next) => {
 
 exports.addBook = (req, res, next) => {
   const imgUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+
   const book = new Book({
     ...JSON.parse(req.body.book),
     imageUrl: imgUrl,
@@ -51,7 +52,7 @@ exports.modifyBook = (req, res, next) => {
         const filename = book.imageUrl.split('/images/')[1];
         fs.unlink(`images/${filename}`, () => {});
       }
-      Book.updateOne(req.params._id, { ...bookObject })
+      Book.updateOne({ _id: req.params.id }, { ...bookObject })
         .then(() => res.status(200).json({ message: 'book modify' }))
         .catch((error) => res.status(400).json({ error }));
     }
@@ -76,17 +77,17 @@ exports.delBook = (req, res, next) => {
 };
 
 exports.rateBook = (req, res, next) => {
-  const { userId, rating } = req.body;
   Book.findOne({ _id: req.params.id })
     .then((book) => {
       const rating = book.ratings.find(({ userId }) => userId === req.body.userId);
       if (rating) {
-        res.status(400).json({ message: 'book already rated' });
+        res.status(400).json({ message: 'book  already rated' });
       } else {
-        book.ratings.push({ ...req.body });
+        book.ratings.push({ userId: req.body.userId, grade: req.body.rating });
         const totalRatings = book.ratings.length;
-        const sumRatings = book.ratings.reduce((a, b) => a + parseInt(b.rating), 0);
+        const sumRatings = book.ratings.reduce((a, b) => a + parseInt(b.grade), 0);
         book.averageRating = (sumRatings / totalRatings).toFixed(0);
+
         book.save();
         res.status(200).json(book);
       }
